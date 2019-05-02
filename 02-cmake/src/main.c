@@ -5,6 +5,6 @@
 
 int main()
 {
-    printf("Hello ANN! %s\n", VERSION);
+    printf("Hello ANN! %s\n", ANN_VERSION);
     return EXIT_SUCCESS;
 }
