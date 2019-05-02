@@ -31,7 +31,7 @@ struct PCFNN_NETWORK *init_net()
 void train(struct PCFNN_NETWORK *net, struct DATASET *d)
 {
      PCFNN_NETWORK_train(net, d->data, d->target,
-        d->size, 0.0, NULL, 1, 4, 10, 0.5, f_cost_quadratic_loss_de);
+        d->size, 0.0, NULL, 1, 5, 15, 0.3, f_cost_quadratic_loss_de);
 }
 
 int isOk(double *out, double *target, size_t size)
