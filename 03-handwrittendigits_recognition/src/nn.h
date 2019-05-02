@@ -10,4 +10,10 @@
 #include <ANN/tools.h>
 
 
+struct PCFNN_NETWORK *init_net();
+
+void train(struct PCFNN_NETWORK *net, struct DATASET *d);
+
+size_t check(struct PCFNN_NETWORK *net, struct DATASET *d);
+
 #endif /* _SRC_NN_H */
