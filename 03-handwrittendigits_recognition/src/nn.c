@@ -161,7 +161,7 @@ void get(struct PCFNN_NETWORK *net, struct DATASET *d)
             outm = i;
         if (d->target[0][i] > d->target[0][tm])
             tm = i;
-        printf("[Digit %ld]: propa %f)\n", i, out[i] * 100);
+        printf("[Digit %ld]: propa %f%%)\n", i, out[i] * 100);
     }
     printf("Result: it's a %ld! (propa: %f%%)    | expected: %ld\n", outm, out[outm] * 100, tm);
     free(out);

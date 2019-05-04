@@ -13,8 +13,11 @@ DEP = ${SRC:.c=.d}
 
 all: main
 
-run: main
-	@./main ./dataset/training/ ./dataset/testing/
+train: main
+	@./main train ./dataset/training ./dataset/testing
+
+check: main
+	@./main check ./dataset/testing
 
 main: ${OBJ} 
 	${CC} ${CFLAGS} -o main ${OBJ} ${LDFLAGS} ${LDLIBS}
