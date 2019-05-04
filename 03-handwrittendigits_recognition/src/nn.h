@@ -2,6 +2,9 @@
 #define _SRC_NN_H
 
 #include <stdlib.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <time.h>
 #include <ANN/models/PCFNN/network.h>
 #include <ANN/models/PCFNN/train.h>
 #include <ANN/models/PCFNN/feedforward.h>
@@ -12,7 +15,13 @@
 
 struct PCFNN_NETWORK *init_net();
 
+struct PCFNN_NETWORK *init_load_net();
+
+void savenn(struct PCFNN_NETWORK *net);
+
 void train(struct PCFNN_NETWORK *net, struct DATASET *d);
+
+void train_status(struct PCFNN_NETWORK *net, struct DATASET *d);
 
 size_t check(struct PCFNN_NETWORK *net, struct DATASET *d);
 

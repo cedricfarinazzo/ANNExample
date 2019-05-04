@@ -10,6 +10,24 @@
 
 #include "dataset.h"
 
+size_t countFileInDir(char *path)
+{
+    size_t file_count = 0;
+    DIR *dirp;
+    struct dirent *entry;
+
+    dirp = opendir(path); /* There should be error handling after this */
+    while ((entry = readdir(dirp)) != NULL) {
+        if (strcmp(entry->d_name, ".") == 0 ||
+            strcmp(entry->d_name, "..") == 0)
+            continue;
+        if (entry->d_type == DT_REG) /* If the entry is a regular file */
+             file_count++;
+    }
+    closedir(dirp);
+    return file_count;
+}
+
 int getDigitFromFileName(char *file)
 {
     size_t i = 0;
@@ -56,16 +74,20 @@ struct DATASET *LoadDataset(char *path, size_t target_size)
     dataset->size = 0;
     dataset->target_size = target_size;
     dataset->data = dataset->target = NULL;
-    size_t len = 0;
+    
+    dataset->size = countFileInDir(path);;
+    double **data = malloc(sizeof(double*) * dataset->size);
+    double **target = malloc(sizeof(double*) * dataset->size);
+    dataset->data = data;
+    dataset->target = target;
+
+    size_t i = 0;
     DIR *d;
     struct dirent *handler;
     d = opendir(path);
     if (d == NULL) return dataset;
 
-    double **data = malloc(sizeof(double*) * len);
-    double **target = malloc(sizeof(double*) * len);
-
-    while ((handler = readdir(d)) != NULL)
+    while ((handler = readdir(d)) != NULL && i < dataset->size)
     {
         char *name = handler->d_name;
         if (strcmp(name, ".") == 0 ||
@@ -85,18 +107,11 @@ struct DATASET *LoadDataset(char *path, size_t target_size)
         SDL_FreeSurface(img);
         if (imgmat == NULL) { free(expout); continue; }
 
-        ++len;
-        data = realloc(data, sizeof(double*) * len);
-        if (data == NULL) { free(expout); free(imgmat); free(target); free(dataset); return NULL; }
-        target = realloc(target, sizeof(double*) *len);
-        if (target == NULL) { free(expout); free(imgmat); free(data); free(dataset); return NULL; }
-        data[len - 1] = imgmat;
-        target[len - 1] = expout;
+        data[i] = imgmat;
+        target[i] = expout;
+        ++i;
     }
     closedir(d);
-    dataset->size = len;
-    dataset->data = data;
-    dataset->target = target;
     return dataset;
 }
 

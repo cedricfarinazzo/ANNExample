@@ -21,17 +21,18 @@ int main(int argc, char *argv[])
         struct DATASET *dte = LoadDataset(path2, 10);
         printf("Testing dataset (%s): Loaded %ld digit images in memory\n", path2, dte->size);
 
-        struct PCFNN_NETWORK *net = init_net();
         printf("Init neural network\n");
+        struct PCFNN_NETWORK *net = init_load_net();
+        
         printf("Training...\n");
-        train(net, dtr);
+        train_status(net, dtr);
         printf("Training done\n");
         FreeDataset(dtr);
 
-        printf("Testing...\n");
-        size_t nberror = check(net, dte);
-        printf("Testing done\n");
-        printf("Error: %ld (%f%%)\n", nberror, (double)nberror / (double)dte->size * 100);
+        printf("Saving network config\n");
+        savenn(net);
+
+        check(net, dte);
 
         FreeDataset(dte);
         PCFNN_NETWORK_free(net);
