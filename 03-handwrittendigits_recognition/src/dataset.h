@@ -6,6 +6,8 @@
 #include <SDL/SDL_image.h>
 #include <dirent.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include "sdl.h"

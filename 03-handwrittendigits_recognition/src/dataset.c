@@ -4,6 +4,8 @@
 #include <SDL/SDL_image.h>
 #include <dirent.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include "sdl.h"
@@ -31,10 +33,10 @@ size_t countFileInDir(char *path)
 int getDigitFromFileName(char *file)
 {
     size_t i = 0;
-    while (i < strlen(file) && file[i] != '_') ++i;
-    if (i >= strlen(file)) return -1;
-    char ascii[i];
-    for (size_t j = 0; j < i; ++j) ascii[j] = file[j];
+    char *base = basename(file);
+    while (i < strlen(base) && base[i] != '_') ++i;
+    char ascii[i+1]; ascii[i] = 0;
+    for (size_t j = 0; j < i; ++j) ascii[j] = base[j];
     int digit;
     sscanf(ascii, "%d", &digit);
     return digit;
@@ -67,6 +69,14 @@ double *genExpectedOutput(size_t size, int digit)
     return expected;
 }
 
+
+int is_regular_file(const char *path)
+{
+    struct stat path_stat;
+    stat(path, &path_stat);
+    return S_ISREG(path_stat.st_mode);
+}
+
 struct DATASET *LoadDataset(char *path, size_t target_size)
 {
     struct DATASET *dataset = malloc(sizeof(struct DATASET));
@@ -74,7 +84,33 @@ struct DATASET *LoadDataset(char *path, size_t target_size)
     dataset->size = 0;
     dataset->target_size = target_size;
     dataset->data = dataset->target = NULL;
+
+    if (is_regular_file(path))
+    {
+        dataset->size = 1;
+        double **data = malloc(sizeof(double*) * dataset->size);
+        double **target = malloc(sizeof(double*) * dataset->size);
+        dataset->data = data;
+        dataset->target = target;
+        int digit = getDigitFromFileName(path);
+        if (digit == -1) { free(dataset); free(data); free(target); return NULL; }
+        SDL_Surface *img = load_image(path);
+        if (img == NULL) { free(dataset); free(data); free(target); return NULL; }
+        double *expout = genExpectedOutput(target_size, digit);
+        if (expout == NULL) { free(dataset); free(data); free(target); SDL_FreeSurface(img); return NULL; };
+        double *imgmat = SDLSurfToMat(img);
+        SDL_FreeSurface(img);
+        if (imgmat == NULL) { free(dataset); free(data); free(target); free(expout); return NULL; }
+
+        data[0] = imgmat;
+        target[0] = expout;
+        return dataset;
+    }
     
+    size_t lpath = strlen(path);
+    char pathd[lpath + 2]; pathd[lpath + 1] = 0;
+    strcpy(pathd, path); pathd[lpath] = '/';
+
     dataset->size = countFileInDir(path);;
     double **data = malloc(sizeof(double*) * dataset->size);
     double **target = malloc(sizeof(double*) * dataset->size);
@@ -84,7 +120,7 @@ struct DATASET *LoadDataset(char *path, size_t target_size)
     size_t i = 0;
     DIR *d;
     struct dirent *handler;
-    d = opendir(path);
+    d = opendir(pathd);
     if (d == NULL) return dataset;
 
     while ((handler = readdir(d)) != NULL && i < dataset->size)
@@ -95,7 +131,7 @@ struct DATASET *LoadDataset(char *path, size_t target_size)
             continue;
 
         char filename[PATH_MAX];
-        strcpy(filename, path);
+        strcpy(filename, pathd);
         strcat(filename, name);
         int digit = getDigitFromFileName(name);
         if (digit == -1) continue;

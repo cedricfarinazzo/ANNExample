@@ -25,4 +25,6 @@ void train_status(struct PCFNN_NETWORK *net, struct DATASET *d);
 
 size_t check(struct PCFNN_NETWORK *net, struct DATASET *d);
 
+void get(struct PCFNN_NETWORK *net, struct DATASET *d);
+
 #endif /* _SRC_NN_H */

@@ -1,6 +1,5 @@
 *.d
 *.o
 main
-*.nn
 *.gcda
 *.gcno
