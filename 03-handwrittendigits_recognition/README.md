@@ -64,7 +64,7 @@ Testing done
 [Digit 7]: error : 58 / 1028 (5.642023%)
 [Digit 8]: error : 55 / 974 (5.646817%)
 [Digit 9]: error : 44 / 1009 (4.360753%)
-Error: 324 (3.240000%)
+TOTAL Error: 324 (3.240000%)
 ```
 View [src/nn.c](src/nn.c).
 
