@@ -1,11 +1,7 @@
 ## ANN Example
 
-### Requirements
+Some examples to demonstrate how to use [ANN](https://gitlab.com/cedricfarinazzo/adaptativeneuralnetwork)
 
-- gcc or clang
-- make
-- cmake
-- [ANN](https://gitlab.com/cedricfarinazzo/adaptativeneuralnetwork) installed
 
 ## 01 Make example
 
@@ -16,4 +12,8 @@ View example [here](01-make)
 
 View example [here](02-cmake)
 
+
+## 03 Handwritten Digits Recognition
+
+View example [here](03-handwrittendigits_recognition)
 

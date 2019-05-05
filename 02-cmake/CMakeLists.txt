@@ -1,13 +1,11 @@
 cmake_minimum_required(VERSION 3.12)
 project(ANNExample LANGUAGES C)
 
-set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS TRUE)
-
 find_library(ANN NAMES ANN)
-if( NOT ANN)
-    message(FATAL_ERROR "ANN library not found")
+if(NOT ANN)
+    message(FATAL_ERROR "ANN library not found") # ANN installed required
 endif()
-include_directories(${ANN_INCLUDE_DIR})
+include_directories(${ANN_INCLUDE_DIR}) # Include ANN headers files
 
 
 ### FLAGS 
@@ -26,7 +24,7 @@ set (CMAKE_MODULE_LINKER_FLAGS_RELEASE "-Ofast")
 
 FILE(GLOB_RECURSE SRCFILES src/*.c)
 add_executable(Main ${SRCFILES})
-target_link_libraries(Main ${ANN_LIBRARIES})
+target_link_libraries(Main ${ANN_LIBRARIES}) # Link with ANN library
 
 ### TARGET
 add_custom_target(run
