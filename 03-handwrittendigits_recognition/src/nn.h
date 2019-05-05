@@ -17,6 +17,8 @@ struct PCFNN_NETWORK *init_net();
 
 struct PCFNN_NETWORK *init_load_net();
 
+void print_ram_usage(struct PCFNN_NETWORK *net);
+
 void savenn(struct PCFNN_NETWORK *net);
 
 void train(struct PCFNN_NETWORK *net, struct DATASET *d);

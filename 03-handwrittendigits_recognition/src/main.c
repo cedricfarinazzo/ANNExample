@@ -32,6 +32,7 @@ int main(int argc, char *argv[])
                 printf("Failed to init network!\n");
                 return EXIT_FAILURE;
             }
+            print_ram_usage(net);
 
             check(net, dte);
 
@@ -59,6 +60,7 @@ int main(int argc, char *argv[])
                 printf("Failed to init network!\n");
                 return EXIT_FAILURE;
             }
+            print_ram_usage(net);
 
             get(net, dte);
 
@@ -101,6 +103,7 @@ int main(int argc, char *argv[])
                 printf("Failed to init network!\n");
                 return EXIT_FAILURE;
             }
+            print_ram_usage(net);
 
             printf("Training...\n");
             train_status(net, dtr);

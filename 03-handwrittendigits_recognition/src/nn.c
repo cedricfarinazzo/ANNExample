@@ -44,6 +44,23 @@ struct PCFNN_NETWORK *init_load_net()
     return net;
 }
 
+void print_ram_usage(struct PCFNN_NETWORK *net)
+{
+    size_t u = PCFNN_NETWORK_get_ram_usage(net);
+    printf("Neural network ram usage: ");
+    if (u < 1000)
+        printf("%ld o", u);
+    else if (u < 1000000 && u > 1000)
+        printf("%.2f Ko", (double)u / 1000.);
+    else if (u < 1000000000 && u > 1000000)
+        printf("%.2f Mo", (double)u / 1000000.);
+    else if (u < 1000000000000 && u > 1000000000)
+        printf("%.2f Go", (double)u / 1000000000.);
+    else
+        printf("%.2f To", (double)u / 1000000000000.);
+    printf("\n");
+}
+
 void savenn(struct PCFNN_NETWORK *net)
 {
     FILE *f = fopen("conf.nn", "w+");
