@@ -70,7 +70,7 @@ void savenn(struct PCFNN_NETWORK *net)
 void train(struct PCFNN_NETWORK *net, struct DATASET *d)
 {
      PCFNN_NETWORK_train(net, d->data, d->target,
-        d->size, 0.0, NULL, 1, 7, 40, 0.03, 0, f_cost_quadratic_loss_de, NULL);
+        d->size, 0.0, 1, 7, 40, 0.03, 0, NULL, f_cost_quadratic_loss_de, NULL);
 }
 
 struct trainthread {
@@ -83,7 +83,7 @@ void *train_worker(void *a)
 {
     struct trainthread *t = (struct trainthread*)a;
     PCFNN_NETWORK_train(t->net, t->d->data, t->d->target,
-        t->d->size, 0.0, NULL, 1, 7, 10, 0.1, 0.9, f_cost_quadratic_loss_de, t->status);
+        t->d->size, 0.0, 1, 7, 10, 0.1, 0.9, NULL, f_cost_quadratic_loss_de, t->status);
     return NULL;
 }
 
@@ -137,6 +137,14 @@ int isOk(double *out, double *target, size_t size)
 size_t check(struct PCFNN_NETWORK *net, struct DATASET *d)
 {
     printf("Testing...\n");
+
+    double *val = PCFNN_NETWORK_train(net, d->data, d->target,
+        d->size, 1.0, 0, 0, 0, 0, 0, f_cost_quadratic_loss, f_cost_quadratic_loss_de, NULL);
+    double average = 0;
+    for (size_t i = 0; i < d->target_size; ++i)
+        average += val[i];
+    average /= (double)d->target_size;
+
     size_t nbdigit[10]; size_t errdigit[10];
     for (size_t i = 0; i < 10; ++i)
         errdigit[i] = nbdigit[i] = 0;
@@ -157,10 +165,15 @@ size_t check(struct PCFNN_NETWORK *net, struct DATASET *d)
         free(out);
     }
     printf("Testing done\n");
-    for (size_t i = 0; i < 10; ++i)
+    for (size_t i = 0; i < d->target_size; ++i)
         printf("[Digit %ld]: error : %ld / %ld (%f%%)\n", i, errdigit[i], nbdigit[i], 
                nbdigit[i] != 0 ? (double)errdigit[i] / (double)nbdigit[i] * 100 : 0);
     printf("Error: %ld (%f%%)\n", nberror, (double)nberror / (double)d->size * 100);
+    for (size_t i = 0; i < d->target_size; ++i)
+        printf("[Digit %ld]: loss  %f\n", i, val[i]);
+    printf("Average loss: %f\n", average);
+    
+    free(val);
     return nberror;
 }
 
