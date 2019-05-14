@@ -58,7 +58,7 @@ SDL_Surface *CreateSDLImage(int width, int height)
 {
     SDL_Surface *surface;
 
-    surface = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, 
+    surface = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height,
                                    32, 0, 0, 0, 0);
     if(surface == NULL) {
         fprintf(stderr, "CreateRGBSurface failed: %s\n", SDL_GetError());

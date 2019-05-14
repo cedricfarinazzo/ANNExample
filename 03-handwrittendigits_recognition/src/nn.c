@@ -20,7 +20,7 @@ struct PCFNN_NETWORK *init_net()
     struct PCFNN_LAYER *l2 = PCFNN_LAYER_new(NULL, NULL, NULL);
     struct PCFNN_LAYER *l3 = PCFNN_LAYER_new(NULL, NULL, NULL);
     struct PCFNN_LAYER *l4 = PCFNN_LAYER_new(NULL, NULL, NULL);
-    PCFNN_NETWORK_addl(net, l1); PCFNN_NETWORK_addl(net, l2); 
+    PCFNN_NETWORK_addl(net, l1); PCFNN_NETWORK_addl(net, l2);
     PCFNN_NETWORK_addl(net, l3); PCFNN_NETWORK_addl(net, l4);
 
     PCFNN_LAYER_connect(l1, l2, 784, 128, 0, 0, f_init_rand_norm, f_act_sigmoid, f_act_sigmoid_de);
@@ -42,23 +42,6 @@ struct PCFNN_NETWORK *init_load_net()
         printf("Load network config from %s\n", "conf.nn");
     }
     return net;
-}
-
-void print_ram_usage(struct PCFNN_NETWORK *net)
-{
-    size_t u = PCFNN_NETWORK_get_ram_usage(net);
-    printf("Neural network ram usage: ");
-    if (u < 1000)
-        printf("%ld o", u);
-    else if (u < 1000000 && u > 1000)
-        printf("%.2f Ko", (double)u / 1000.);
-    else if (u < 1000000000 && u > 1000000)
-        printf("%.2f Mo", (double)u / 1000000.);
-    else if (u < 1000000000000 && u > 1000000000)
-        printf("%.2f Go", (double)u / 1000000000.);
-    else
-        printf("%.2f To", (double)u / 1000000000000.);
-    printf("\n");
 }
 
 void savenn(struct PCFNN_NETWORK *net)
@@ -83,7 +66,7 @@ void *train_worker(void *a)
 {
     struct trainthread *t = (struct trainthread*)a;
     PCFNN_NETWORK_train(t->net, t->d->data, t->d->target,
-        t->d->size, 0.0, 1, 7, 10, 0.1, 0.9, NULL, f_cost_quadratic_loss_de, t->status);
+        t->d->size, 0.0, 1, 7, 1, 0.05, 0.9, NULL, f_cost_quadratic_loss_de, t->status);
     return NULL;
 }
 
@@ -95,7 +78,7 @@ void train_status(struct PCFNN_NETWORK *net, struct DATASET *d)
 
     clock_t start = clock();
     clock_t end;
-    double time_taken; 
+    double time_taken;
 
     pthread_attr_t tattr;
     struct sched_param param;
@@ -103,20 +86,20 @@ void train_status(struct PCFNN_NETWORK *net, struct DATASET *d)
     pthread_attr_getschedparam(&tattr, &param);
     (param.sched_priority)++;
     pthread_attr_setschedparam(&tattr, &param);
-    
+
     pthread_t t;
     if (pthread_create(&t, &tattr, train_worker, &tt) != 0)
         return;
     while (pthread_tryjoin_np(t, NULL) != 0)
     {
         end = clock();
-        time_taken = ((double)(end - start))/CLOCKS_PER_SEC; // in seconds 
+        time_taken = ((double)(end - start))/CLOCKS_PER_SEC; // in seconds
         printf("\rTraining status : %d%% (%f seconds)", (int)status, time_taken);
         fflush(stdout);
         sleep(1);
     }
     end = clock();
-    time_taken = ((double)end - start)/CLOCKS_PER_SEC; // in seconds 
+    time_taken = ((double)end - start)/CLOCKS_PER_SEC; // in seconds
     printf("\rTraining status : %d%% (%f seconds)\n", (int)status, time_taken);
     return;
 }
@@ -140,16 +123,16 @@ size_t check(struct PCFNN_NETWORK *net, struct DATASET *d)
 
     double *val = PCFNN_NETWORK_train(net, d->data, d->target,
         d->size, 1.0, 0, 0, 0, 0, 0, f_cost_quadratic_loss, f_cost_quadratic_loss_de, NULL);
-    double average = 0;
+    double loss = 0;
     for (size_t i = 0; i < d->target_size; ++i)
-        average += val[i];
-    average /= (double)d->target_size;
+        loss += val[i];
+    free(val);
 
     size_t nbdigit[10]; size_t errdigit[10];
     for (size_t i = 0; i < 10; ++i)
         errdigit[i] = nbdigit[i] = 0;
     size_t nberror = 0;
-    for(size_t i = 0; i < d->size; ++i) 
+    for(size_t i = 0; i < d->size; ++i)
     {
         int digit;
         for (digit = 0; d->target[i][digit] != 1 && digit < 10; ++digit);
@@ -157,7 +140,7 @@ size_t check(struct PCFNN_NETWORK *net, struct DATASET *d)
 
         PCFNN_NETWORK_feedforward(net, d->data[i]);
         double *out = PCFNN_NETWORK_get_output(net);
-        
+
         int iserr = !isOk(out, d->target[i], d->target_size);
         nberror += iserr;
         errdigit[digit] += iserr;
@@ -166,21 +149,18 @@ size_t check(struct PCFNN_NETWORK *net, struct DATASET *d)
     }
     printf("Testing done\n");
     for (size_t i = 0; i < d->target_size; ++i)
-        printf("[Digit %ld]: error : %ld / %ld (%f%%)\n", i, errdigit[i], nbdigit[i], 
+        printf("[Digit %ld]: error : %ld / %ld (%f%%)\n", i, errdigit[i], nbdigit[i],
                nbdigit[i] != 0 ? (double)errdigit[i] / (double)nbdigit[i] * 100 : 0);
     printf("Error: %ld (%f%%)\n", nberror, (double)nberror / (double)d->size * 100);
-    for (size_t i = 0; i < d->target_size; ++i)
-        printf("[Digit %ld]: loss  %f\n", i, val[i]);
-    printf("Average loss: %f\n", average);
-    
-    free(val);
+    printf("Loss: %f\n", loss);
+
     return nberror;
 }
 
 void get(struct PCFNN_NETWORK *net, struct DATASET *d)
 {
     if (d->size != 1) return;
-    
+
     PCFNN_NETWORK_feedforward(net, d->data[0]);
     double *out = PCFNN_NETWORK_get_output(net);
 

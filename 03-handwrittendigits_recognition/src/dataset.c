@@ -105,7 +105,7 @@ struct DATASET *LoadDataset(char *path, size_t target_size)
         target[0] = expout;
         return dataset;
     }
-    
+
     size_t lpath = strlen(path);
     char pathd[lpath + 2]; pathd[lpath + 1] = 0;
     strcpy(pathd, path); pathd[lpath] = '/';
@@ -154,8 +154,8 @@ void FreeDataset(struct DATASET *d)
 {
     for (size_t i = 0; i < d->size; ++i)
     {
-        free(d->data[i]);  
-        free(d->target[i]); 
+        free(d->data[i]);
+        free(d->target[i]);
     }
     free(d->data);
     free(d->target);
